@@ -9,7 +9,7 @@ News Recommendation Program using TF-IDF
 
 1.ディレクトリ past/に含まれる記事の中から好きな記事のタイトルを myfavorite.txtに書いておきます。  
 2. NewsRecommendation.shを実行すると、PHPプログラムが自動的にGoogleニュースを取得し、全記事をおすすめ順でランキングしてくれます。(結果はmyfavorite.txt.outとして出力)  
-3. 新着の記事はディレクトリ new/に、morphol/は記事の解析データか格納されます。また、new/とmorphol/ディレクトリは実行ごとにリフレッシュされ、実行後に新着記事は自動的にpast/にコピーされます。  
+3. 新着の記事はディレクトリ new/に、morphol/は記事の解析データが格納されます。また、new/とmorphol/ディレクトリは実行ごとにリフレッシュされ、実行後に新着記事は自動的にpast/にコピーされます。  
   
 ちょくちょく改良していきます^^  
  
