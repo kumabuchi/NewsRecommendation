@@ -16,35 +16,71 @@ import java.util.Iterator;
 import org.atilika.kuromoji.Token;
 import org.atilika.kuromoji.Tokenizer;
 
+/*
+ * NewsRecommendation
+ * ニュース閲覧記録からtf-idfを用いて新着ニュースの推薦を行うプログラム
+ * 各記事を形態素解析して出現する名詞を抽出、閲覧済みニュースにある名詞とのtf-idfを求める。
+ */
 public class NewsRecommendation  {
 
+	/* 設定変数 */
+	
+	// 新着記事における単語の出現情報ファイル出力先ディレクトリ
 	public static final String OUTPUT_PATH_OF_TERM = "./";
+	// 推薦記事情報出力先ディレクトリ
 	public static final String OUTPUT_PATH_OF_OUT = "./";
+	// 新着記事の形態素解析結果出力ディレクトリ
 	public static final String OUTPUT_PATH_OF_MOR = "./morphol/";
+	// 過去の記事が格納されているディレクトリ
 	public static final String INPUT_PATH_OF_PAST = "./past/";
+	// 新着記事が格納されているディレクトリ
 	public static final String INPUT_PATH_OF_NEW = "./new/";
+	
+	/* 設定変数 ここまで */
+	
 
+	// ニュース閲覧記録ファイル名
 	private String favoriteFile = null;
+	// 閲覧済ニュースの総単語(名詞)数
 	private int numOfTerms = 0;
 
+	// 閲覧済単語と出現頻度を保持するMap
 	private HashMap<String, Integer> favTerms = null;
+	// 単語とそれが出現する記事を保持するするMap
 	private HashMap<String, ArrayList<String>> dictionary = null;
+	// 形態素解析情報出力ファイル名一覧
 	private ArrayList<String> morFileList = null;
+	// 各新着記事のTf-Idf値
 	private ArrayList<TfIdf> scores = null;
 
 
+	/*
+	 * コンストラクタ
+	 */
 	public NewsRecommendation(){
 		// default constructor
 	}
 
+	/*
+	 * コンストラクタ
+	 * @param
+	 * favoriteFile 閲覧済記事タイトル一覧ファイル名
+	 */
 	public NewsRecommendation(String favoriteFile){
 		this.favoriteFile = favoriteFile;
 	}
 
+	/*
+	 * Setter
+	 */
 	public void setFavoriteFile(String favoriteFile){
 		this.favoriteFile = favoriteFile;
 	}
 
+	/*
+	 * 実行関数
+	 * インスタンス生成元が呼び出すのはこのメソッドです。
+	 */
 	public void run(){
 		readFavorite();
 		readNew();
@@ -52,6 +88,11 @@ public class NewsRecommendation  {
 		output();
 	}
 
+	/*
+	 * 閲覧済記事読み込み関数
+	 * 閲覧済記事を読み込み、形態素解析して単語(名詞)の出現頻度を求める。
+	 * 記事中で#で始まる行は無視される。
+	 */
 	private void readFavorite(){
 
 		if( this.favoriteFile == null ){
@@ -59,6 +100,7 @@ public class NewsRecommendation  {
 			System.exit(-1);
 		}
 
+		// タイトル一覧(ファイル名)を取得
 		favTerms = new HashMap<String, Integer>();
 		BufferedReader br = null;
 		try {
@@ -70,6 +112,7 @@ public class NewsRecommendation  {
 		String line = null;
 		try{
 			while( (line = br.readLine()) != null ){
+				// 各記事にアクセス
 				BufferedReader br_past = new BufferedReader(new FileReader(INPUT_PATH_OF_PAST+line));
 				String pastLine, text = null;
 				while( (pastLine = br_past.readLine()) != null ){
@@ -77,6 +120,7 @@ public class NewsRecommendation  {
 						text += pastLine;
 				}
 				br_past.close();
+				// 形態素解析・名詞を集計
 				Tokenizer tokenizer = Tokenizer.builder().build();
 				List<Token> tokens = tokenizer.tokenize(text);
 				for (Token token : tokens) {
@@ -94,6 +138,8 @@ public class NewsRecommendation  {
 			System.err.println("[ERROR] : IOException while processing file -> "+line);
 			System.exit(-1);
 		}
+		
+		// 解析結果をファイル出力
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_TERM+favoriteFile+".term"));
 			bw.write(numOfTerms+"\n");
@@ -110,15 +156,21 @@ public class NewsRecommendation  {
 		}
 	}
 
+	/*
+	 * 新着記事読み込み関数
+	 * 新着記事を読み込み、形態素解析して単語(名詞)の出現頻度を求める。
+	 * 記事中で#で始まる行は無視される。
+	 */
 	private void readNew(){
 		dictionary = new HashMap<String, ArrayList<String>>();
 		morFileList = new ArrayList<String>();
+		// 新着記事一覧を取得
 		File dir = new File(INPUT_PATH_OF_NEW);
 		File[] files = dir.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			File file = files[i];
 			try{
-
+				// 新着記事にアクセス
 				BufferedReader br_new = new BufferedReader(new FileReader(file));
 				String newLine, text = null;
 				while( (newLine = br_new.readLine()) != null ){
@@ -129,6 +181,7 @@ public class NewsRecommendation  {
 
 				HashMap<String, Integer> terms = new HashMap<String, Integer>();
 				int termCnt = 0;
+				// 形態素解析・名詞を集計
 				Tokenizer tokenizer = Tokenizer.builder().build();
 				List<Token> tokens = tokenizer.tokenize(text);
 				for (Token token : tokens) {
@@ -141,6 +194,7 @@ public class NewsRecommendation  {
 					}
 				}
 
+				// 解析結果をファイル出力
 				String[] spPath = file.toString().split("/");
 				morFileList.add(OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor");
 				BufferedWriter bw_new = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor"));
@@ -164,6 +218,8 @@ public class NewsRecommendation  {
 				System.exit(-1);
 			}
 		}
+		
+		// 全単語と出現する記事名をファイル出力
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_MOR+"terms.txt"));
 			for (Iterator<Entry<String, ArrayList<String>>> it = dictionary.entrySet().iterator(); it.hasNext();) {
@@ -180,6 +236,10 @@ public class NewsRecommendation  {
 		}
 	}
 
+	/*
+	 * 閲覧済記事に含まれる単語について、Tf-Idfを求める関数
+	 * 最終的な記事のスコアはTf-Idf値の和で算出される。
+	 */
 	private void calcTfIdf(){
 		scores = new ArrayList<TfIdf>();
 		for( int i=0; i<morFileList.size(); i++ ){
@@ -211,6 +271,7 @@ public class NewsRecommendation  {
 						System.out.println(dictionary.get(key).size());
 						System.out.println("====================");		
 						*/
+						// Tf-Idf 計算式
 						tfIdf += ((double)map.get(key)/(double)numTerms)*Math.log10(morFileList.size()/dictionary.get(key).size());
 					}
 				}
@@ -228,6 +289,11 @@ public class NewsRecommendation  {
 				});
 	}
 
+	/*
+	 * 推薦記事出力関数
+	 * 推薦記事をスコアと共にファイル出力します。
+	 * 記事が選ばれるわけではなく、ランキングされた全記事が出力されます。
+	 */
 	private void output(){
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_OUT+favoriteFile+".out"));
@@ -242,6 +308,11 @@ public class NewsRecommendation  {
 		}
 	}
 
+	/*
+	 * メインルーチン
+	 * @param
+	 * args[0] 閲覧済(お気に入り)記事タイトル一覧ファイル
+	 */
 	public static void main(String[] args) {
 
 		if( args.length < 1 ){
@@ -257,11 +328,20 @@ public class NewsRecommendation  {
 	}
 }
 
+/*
+ * Tf-Idf値保持用クラス
+ * 各記事の評価値(Tf-Idf値の和)を保持します。
+ */
 class TfIdf {
 
+	// 記事タイトル
 	private String title;
+	// 評価値
 	private double score;
 
+	/*
+	 * コンストラクタ
+	 */
 	public TfIdf(String title, double score){
 		this.title = title;
 		this.score = score;

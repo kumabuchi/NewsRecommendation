@@ -2,6 +2,9 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
+/*
+ * ニュースを整形するクラス
+ */
 public class NewsExtractor  {
 
     public static void main(String[] args) {
@@ -26,7 +29,7 @@ public class NewsExtractor  {
 			bw = new BufferedWriter(new FileWriter("new/"+line.replace(" ","")));
 			titleFlag = 1;	
                 }else if( contentsFlag == 1 && titleFlag == 1 && line.indexOf("http") == 0 ) 
-			bw.write("#"+line+"\n");
+			bw.write("#"+line+"\n"); // 行頭に#を置くとtf-idfの計算に考慮しない(linkは無視)
 		else if( line.indexOf("fullrss.net") != -1 ){
 			if( bw != null )
 				bw.close();
