@@ -26,9 +26,9 @@ public class NewsRecommendation  {
 	/* 設定変数 */
 	
 	// 新着記事における単語の出現情報ファイル出力先ディレクトリ
-	public static final String OUTPUT_PATH_OF_TERM = "./";
+	public static final String OUTPUT_PATH_OF_TERM = "./output/";
 	// 推薦記事情報出力先ディレクトリ
-	public static final String OUTPUT_PATH_OF_OUT = "./";
+	public static final String OUTPUT_PATH_OF_OUT = "./output/";
 	// 新着記事の形態素解析結果出力ディレクトリ
 	public static final String OUTPUT_PATH_OF_MOR = "./morphol/";
 	// 過去の記事が格納されているディレクトリ
