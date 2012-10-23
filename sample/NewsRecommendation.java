@@ -175,48 +175,46 @@ public class NewsRecommendation  {
 				String[] spPath = file.toString().split("/");
                 String outFileName = OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor";
 				morFileList.add(outFileName);
-                if( !(new File(outFileName)).exists() ){
-    	    		// 新着記事にアクセス
-    				BufferedReader br_new = new BufferedReader(new FileReader(file));
-    				String newLine, text = spPath[spPath.length-1]+"。";
-    				while( (newLine = br_new.readLine()) != null ){
-    					if( newLine.indexOf("#") != 0 )
-    						text += newLine;
-    				}
-    				br_new.close();
+    	   		// 新着記事にアクセス
+    			BufferedReader br_new = new BufferedReader(new FileReader(file));
+    			String newLine, text = spPath[spPath.length-1]+"。";
+    			while( (newLine = br_new.readLine()) != null ){
+    				if( newLine.indexOf("#") != 0 )
+    					text += newLine;
+    			}
+    			br_new.close();
     
-    				HashMap<String, Integer> terms = new HashMap<String, Integer>();
-    				int termCnt = 0;
-    				// 形態素解析・名詞を集計
-    				Tokenizer tokenizer = Tokenizer.builder().build();
-    				List<Token> tokens = tokenizer.tokenize(text);
-    				for (Token token : tokens) {
-    					if( token.getAllFeatures().indexOf("名詞") != -1 ){
-    						++termCnt;
-    						int cnt = 1;
-    						if( terms.containsKey(token.getSurfaceForm()) )
-    							cnt = terms.get(token.getSurfaceForm())+1;
-    						terms.put(token.getSurfaceForm(), cnt);
-    					}
-    				}
-    
-    				// 解析結果をファイル出力
-    				BufferedWriter bw_new = new BufferedWriter(new FileWriter(outFileName));
-    				bw_new.write(termCnt+"\n");
-    				for (Iterator<Entry<String, Integer>> it = terms.entrySet().iterator(); it.hasNext();) {
-    					Entry<String, Integer> entry = it.next();
-    					String key = (String) entry.getKey();
-    					Integer value = (Integer) entry.getValue();
-    					bw_new.write(key+"|"+value+"\n");
-    					ArrayList<String> list = dictionary.get(key);
-    					if( list == null )
-    						list = new ArrayList<String>();
-    					if( !list.contains(spPath[spPath.length-1]))
-    						list.add(spPath[spPath.length-1]);
-    					dictionary.put(key, list);
-    				}
-    				bw_new.close();
-                }
+    			HashMap<String, Integer> terms = new HashMap<String, Integer>();
+    			int termCnt = 0;
+    			// 形態素解析・名詞を集計
+    			Tokenizer tokenizer = Tokenizer.builder().build();
+    			List<Token> tokens = tokenizer.tokenize(text);
+    			for (Token token : tokens) {
+    				if( token.getAllFeatures().indexOf("名詞") != -1 ){
+    					++termCnt;
+    					int cnt = 1;
+    					if( terms.containsKey(token.getSurfaceForm()) )
+   							cnt = terms.get(token.getSurfaceForm())+1;
+   						terms.put(token.getSurfaceForm(), cnt);
+   					}
+   				}
+   
+   				// 解析結果をファイル出力
+    			BufferedWriter bw_new = new BufferedWriter(new FileWriter(outFileName));
+    			bw_new.write(termCnt+"\n");
+    			for (Iterator<Entry<String, Integer>> it = terms.entrySet().iterator(); it.hasNext();) {
+    				Entry<String, Integer> entry = it.next();
+    				String key = (String) entry.getKey();
+    				Integer value = (Integer) entry.getValue();
+    				bw_new.write(key+"|"+value+"\n");
+    				ArrayList<String> list = dictionary.get(key);
+    				if( list == null )
+    					list = new ArrayList<String>();
+    				if( !list.contains(spPath[spPath.length-1]))
+    					list.add(spPath[spPath.length-1]);
+    				dictionary.put(key, list);
+    			}
+    			bw_new.close();
 			}catch(Exception e){
 				System.err.println("[ERROR] : IOException while processing file -> "+file);
 				e.printStackTrace();
