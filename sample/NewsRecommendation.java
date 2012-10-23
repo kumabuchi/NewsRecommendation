@@ -140,8 +140,9 @@ public class NewsRecommendation  {
 		}
 		
 		// 解析結果をファイル出力
+        String[] spFav = favoriteFile.split("/");
 		try{
-			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_TERM+favoriteFile+".term"));
+			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_TERM+spFav[spFav.length-1]+".term"));
 			bw.write(numOfTerms+"\n");
 			for (Iterator<Entry<String, Integer>> it = favTerms.entrySet().iterator(); it.hasNext();) {
 				Entry<String, Integer> entry = it.next();
@@ -151,7 +152,8 @@ public class NewsRecommendation  {
 			}
 			bw.close();
 		}catch(IOException e){
-			System.err.println("[ERROR] : IOException while output "+favoriteFile+".terms file.");
+			System.err.println("[ERROR] : IOException while outputting "+OUTPUT_PATH_OF_TERM+spFav[spFav.length-1]+".terms file.");
+            e.printStackTrace();
 			System.exit(-1);
 		}
 	}
@@ -170,48 +172,51 @@ public class NewsRecommendation  {
 		for (int i = 0; i < files.length; i++) {
 			File file = files[i];
 			try{
-				// 新着記事にアクセス
-				BufferedReader br_new = new BufferedReader(new FileReader(file));
-				String newLine, text = null;
-				while( (newLine = br_new.readLine()) != null ){
-					if( newLine.indexOf("#") != 0 )
-						text += newLine;
-				}
-				br_new.close();
-
-				HashMap<String, Integer> terms = new HashMap<String, Integer>();
-				int termCnt = 0;
-				// 形態素解析・名詞を集計
-				Tokenizer tokenizer = Tokenizer.builder().build();
-				List<Token> tokens = tokenizer.tokenize(text);
-				for (Token token : tokens) {
-					if( token.getAllFeatures().indexOf("名詞") != -1 ){
-						++termCnt;
-						int cnt = 1;
-						if( terms.containsKey(token.getSurfaceForm()) )
-							cnt = terms.get(token.getSurfaceForm())+1;
-						terms.put(token.getSurfaceForm(), cnt);
-					}
-				}
-
-				// 解析結果をファイル出力
 				String[] spPath = file.toString().split("/");
-				morFileList.add(OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor");
-				BufferedWriter bw_new = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor"));
-				bw_new.write(termCnt+"\n");
-				for (Iterator<Entry<String, Integer>> it = terms.entrySet().iterator(); it.hasNext();) {
-					Entry<String, Integer> entry = it.next();
-					String key = (String) entry.getKey();
-					Integer value = (Integer) entry.getValue();
-					bw_new.write(key+"|"+value+"\n");
-					ArrayList<String> list = dictionary.get(key);
-					if( list == null )
-						list = new ArrayList<String>();
-					if( !list.contains(spPath[spPath.length-1]))
-						list.add(spPath[spPath.length-1]);
-					dictionary.put(key, list);
-				}
-				bw_new.close();
+                String outFileName = OUTPUT_PATH_OF_MOR+spPath[spPath.length-1]+".mor";
+				morFileList.add(outFileName);
+                if( !(new File(outFileName)).exists() ){
+    	    		// 新着記事にアクセス
+    				BufferedReader br_new = new BufferedReader(new FileReader(file));
+    				String newLine, text = spPath[spPath.length-1]+"。";
+    				while( (newLine = br_new.readLine()) != null ){
+    					if( newLine.indexOf("#") != 0 )
+    						text += newLine;
+    				}
+    				br_new.close();
+    
+    				HashMap<String, Integer> terms = new HashMap<String, Integer>();
+    				int termCnt = 0;
+    				// 形態素解析・名詞を集計
+    				Tokenizer tokenizer = Tokenizer.builder().build();
+    				List<Token> tokens = tokenizer.tokenize(text);
+    				for (Token token : tokens) {
+    					if( token.getAllFeatures().indexOf("名詞") != -1 ){
+    						++termCnt;
+    						int cnt = 1;
+    						if( terms.containsKey(token.getSurfaceForm()) )
+    							cnt = terms.get(token.getSurfaceForm())+1;
+    						terms.put(token.getSurfaceForm(), cnt);
+    					}
+    				}
+    
+    				// 解析結果をファイル出力
+    				BufferedWriter bw_new = new BufferedWriter(new FileWriter(outFileName));
+    				bw_new.write(termCnt+"\n");
+    				for (Iterator<Entry<String, Integer>> it = terms.entrySet().iterator(); it.hasNext();) {
+    					Entry<String, Integer> entry = it.next();
+    					String key = (String) entry.getKey();
+    					Integer value = (Integer) entry.getValue();
+    					bw_new.write(key+"|"+value+"\n");
+    					ArrayList<String> list = dictionary.get(key);
+    					if( list == null )
+    						list = new ArrayList<String>();
+    					if( !list.contains(spPath[spPath.length-1]))
+    						list.add(spPath[spPath.length-1]);
+    					dictionary.put(key, list);
+    				}
+    				bw_new.close();
+                }
 			}catch(Exception e){
 				System.err.println("[ERROR] : IOException while processing file -> "+file);
 				e.printStackTrace();
@@ -231,7 +236,7 @@ public class NewsRecommendation  {
 			}
 			bw.close();
 		}catch(IOException e){
-			System.err.println("[ERROR] : IOException while output terms.txt file.");
+			System.err.println("[ERROR] : IOException while outputting terms.txt file.");
 			System.exit(-1);
 		}
 	}
@@ -296,7 +301,8 @@ public class NewsRecommendation  {
 	 */
 	private void output(){
 		try{
-			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_OUT+favoriteFile+".out"));
+            String[] spOut = favoriteFile.split("/");
+			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_OUT+spOut[spOut.length-1]+".out"));
 			for( int i=0; i<scores.size(); i++ ){
 				bw.write(scores.get(i).getScore()+"\t"+scores.get(i).getTitle()+"\n");
 			}
@@ -326,33 +332,38 @@ public class NewsRecommendation  {
 		System.out.println("[Finish] Complete News Recommendation!");
 
 	}
+
+
+    /*
+     * Tf-Idf値保持用クラス
+     * 各記事の評価値(Tf-Idf値の和)を保持します。
+     */
+    class TfIdf {
+    
+    	// 記事タイトル
+    	private String title;
+    	// 評価値
+    	private double score;
+    
+    	/*
+    	 * コンストラクタ
+    	 */
+    	public TfIdf(String title, double score){
+    		this.title = title;
+    		this.score = score;
+    	}
+    
+    	public String getTitle(){
+    		return this.title;
+    	}
+    
+    	public double getScore(){
+    		return this.score;
+    	}
+    
+    }
+
+
 }
 
-/*
- * Tf-Idf値保持用クラス
- * 各記事の評価値(Tf-Idf値の和)を保持します。
- */
-class TfIdf {
 
-	// 記事タイトル
-	private String title;
-	// 評価値
-	private double score;
-
-	/*
-	 * コンストラクタ
-	 */
-	public TfIdf(String title, double score){
-		this.title = title;
-		this.score = score;
-	}
-
-	public String getTitle(){
-		return this.title;
-	}
-
-	public double getScore(){
-		return this.score;
-	}
-
-}

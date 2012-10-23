@@ -26,6 +26,7 @@ public class NewsExtractor  {
 			titleFlag = 0;
 		}else if( contentsFlag == 1 && titleFlag == 0 && !line.equals("") ){
 			++counter;
+			line = line.replace("/","／");
 			bw = new BufferedWriter(new FileWriter("new/"+line.replace(" ","")));
 			titleFlag = 1;	
                 }else if( contentsFlag == 1 && titleFlag == 1 && line.indexOf("http") == 0 ) 
