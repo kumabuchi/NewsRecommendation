@@ -221,7 +221,7 @@ public class NewsRecommendation  {
 				System.exit(-1);
 			}
 		}
-		
+
 		// 全単語と出現する記事名をファイル出力
 		try{
 			BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_PATH_OF_MOR+"terms.txt"));
