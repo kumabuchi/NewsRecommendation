@@ -8,10 +8,10 @@ News Recommendation Program using TF-IDF
 コア部分はjavaで書いていますが、サンプルプログラムを動かすにはPHPが必要です。  
   
 階層構造と使用方法  
-core  
+core/  
 ├── NewsRecommendation.java (コアプログラム)  
 ├── NewsRecommendation.sh (実行スクリプト)  
-├── favorite
+├── favorite  
 │   └── myfavorite.txt (興味のある記事一覧ファイル)  
 ├── kuromoji-0.7.7.jar (形態素解析器)  
 ├── morphol (新着記事の形態素解析結果格納ディレクトリ)  
