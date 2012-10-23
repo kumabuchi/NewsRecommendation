@@ -7,7 +7,7 @@ News Recommendation Program using TF-IDF
 自動的におすすめのニュースをランキングしてくれるプログラム。  
 コア部分はjavaで書いていますが、サンプルプログラムを動かすにはPHPが必要です。  
   
-階層構造と使用方法  
+####階層構造と使用方法  
 core/  
 ├── NewsRecommendation.java (コアプログラム)  
 ├── NewsRecommendation.sh (実行スクリプト)  
@@ -19,7 +19,7 @@ core/
 ├── output (出力格納ディレクトリ)  
 └── past (過去記事格納ディレクトリ)  
 
-サンプルプログラム sample/  
+####サンプルプログラム sample/  
 1.ディレクトリ past/に含まれる記事の中から好きな記事のタイトルを favorite/myfavorite.txtに書いておきます。  
 2. NewsRecommendation.shを実行すると、PHPプログラムが自動的にGoogleニュースをnew/に取得し、全記事をおすすめ順でランキングしてくれます。(結果はoutput/myfavorite.txt.outとして出力)  
   
